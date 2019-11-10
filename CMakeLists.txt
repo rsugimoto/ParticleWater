@@ -6,10 +6,12 @@ set(CMAKE_CXX_FLAGS "-O2 -Wall")
 
 find_package(GLUT)
 find_package(OpenGL)
+find_package(OpenCV)
 
 file(GLOB SOURCE_FILES *.cpp glcpp/*.cpp)
 add_executable(ParticleWater ${SOURCE_FILES})
 target_link_libraries(ParticleWater ${GLUT_LIBRARY})
 target_link_libraries(ParticleWater ${OPENGL_LIBRARY})
+target_link_libraries(ParticleWater ${OpenCV_LIBS})
 
 add_compile_definitions(GL_SILENCE_DEPRECATION)

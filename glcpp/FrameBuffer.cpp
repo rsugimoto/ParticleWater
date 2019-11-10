@@ -42,7 +42,7 @@ void FrameBuffer::attachAdditionalBuffer(GLsizei width, GLsizei height, GLint mi
     glFramebufferTexture(GL_FRAMEBUFFER, (GLenum)((uint32_t)GL_COLOR_ATTACHMENT0+textures.size()), texture->getTextureId(),0);
     textures.push_back(texture);
     GLenum* drawBuffers = new GLenum[textures.size()];
-    for (int i=0; i<textures.size(); i++) drawBuffers[i] = (GLenum)(GL_COLOR_ATTACHMENT0+i);
+    for (unsigned int i=0; i<textures.size(); i++) drawBuffers[i] = (GLenum)(GL_COLOR_ATTACHMENT0+i);
     glDrawBuffers(textures.size(), drawBuffers);
     delete[] drawBuffers;
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)fprintf(stderr,"FrameBuffer Error\n");

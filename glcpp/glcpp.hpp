@@ -85,17 +85,58 @@ public:
     void setRenderTarget();
 };
 
-class ShaderMaterial{
-private:
+class ShaderProgram;
+
+class ShaderStorageBuffer{
+    private:
+        GLuint buffer_idx;
+        unsigned int storage_block_binding; //Intialized to zero
+        GLuint getStorageBlockBinding();
+    public:
+        static unsigned int buffer_count;
+        ShaderStorageBuffer(GLsizeiptr size, GLenum usage = GL_DYNAMIC_COPY);
+        ShaderStorageBuffer(std::vector<float> data, GLenum usage = GL_DYNAMIC_COPY);
+        ShaderStorageBuffer(std::vector<glm::vec3> data, GLenum usage = GL_DYNAMIC_COPY);
+        ShaderStorageBuffer(std::vector<glm::vec4> data, GLenum usage = GL_DYNAMIC_COPY);
+        ~ShaderStorageBuffer();
+
+    friend ShaderProgram;
+};
+
+class ShaderProgram{
+    ShaderProgram(const ShaderProgram&)=delete;
+public:
+    void setUniform(const char* uni, GLboolean val);
+    void setUniform(const char* uni, GLfloat val);
+    void setUniform(const char* uni, const glm::vec2& val);
+    void setUniform(const char* uni, const glm::vec3& val);
+    void setUniform(const char* uni, const float val[3]);
+    void setUniform(const char* uni, const glm::mat4& val);
+    void setUniform(const char* uni, const glm::mat3& val);
+    void setUniform(const char* uni, const std::vector<glm::vec3>& val);
+
+    void setShaderStorageBuffer(const char* name, ShaderStorageBuffer* buffer);
+
+protected:
     GLuint program;
     std::unordered_map<std::string, GLint> uniforms;
     std::unordered_map<std::string, bool> uniformSet;
+    ShaderProgram();
+    ~ShaderProgram();
+    
+    void init_uniforms();
+    void print_log(GLuint object);
+    char* file_read(const char* filename);
+    GLuint create_shader(const char* filename, GLenum type);
+    GLuint link_program();
+};
+
+
+
+class ShaderMaterial: public ShaderProgram{
+private:
     std::map<std::string, GLuint> textureIds;
     std::unordered_map<GLuint, bool> generateMipmap;
-
-    char* file_read(const char* filename);
-    void print_log(GLuint object);
-    GLuint create_shader(const char* filename, GLenum type);
     GLuint create_program(const char *vert, const char *frag);
     void render();
     GLuint getProgramId();
@@ -104,18 +145,19 @@ public:
     bool depthTest = true;
     bool wireFrame = false;
     ShaderMaterial(const char* vert, const char* frag);
-    ~ShaderMaterial();
-    void setUniform(const char* uni, GLboolean val);
-    void setUniform(const char* uni, GLfloat val);
-    void setUniform(const char* uni, const glm::vec2& val);
-    void setUniform(const char* uni, const glm::vec3& val);
-    void setUniform(const char* uni, const float val[3]);
-    void setUniform(const char* uni, const glm::mat4& val);
-    void setUniform(const char* uni, const glm::mat3& val);
+
     void setUniform(const char* uni, Texture* val);
     void setUniform(const char* uni, FrameBuffer* val);
-    void setUniform(const char* uni, const std::vector<glm::vec3>& val);
     friend class Renderer;
+};
+
+class ComputeShaderProgram: public ShaderProgram{
+private:
+    GLuint create_program(const char *comp);
+public:
+    ComputeShaderProgram(const char* comp);
+    ~ComputeShaderProgram();
+    void dispatchCompute(GLuint num_groups_x, GLuint num_groups_y, GLuint num_groups_z);
 };
 
 
