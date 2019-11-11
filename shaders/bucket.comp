@@ -1,0 +1,10 @@
+#version 430
+
+layout(local_size_x=16) in;
+
+layout(std430) buffer positions_in{ vec4 pos_in[];};
+layout(std430) buffer bucket{ float bkt[];};
+
+void main(){
+    uint threadIndex = gl_GlobalInvocationID.x;
+}

@@ -8,5 +8,7 @@ layout(std430) buffer shader_data{
 
 void main(){
     uint threadIndex = gl_GlobalInvocationID.x;
-    array[threadIndex] = vec4(float(threadIndex));
+    if(threadIndex==0){ array[0] = vec4(-0.5,-0.5,0.9,1.0);}
+    else if(threadIndex==1){ array[1] = vec4(0.5,-0.5,0.0,1.0);}
+    else if(threadIndex==2){ array[2] = vec4(0.0,0.73,-0.5,1.0);}
 }

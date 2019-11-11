@@ -67,7 +67,7 @@ public:
     void getTexImage(GLvoid* pixels);
 
     friend class FrameBuffer;
-    friend class ShaderMaterial;
+    friend class ShaderProgram;
 };
 
 class FrameBuffer{
@@ -89,11 +89,11 @@ class ShaderProgram;
 
 class ShaderStorageBuffer{
     private:
-        GLuint buffer_idx;
-        unsigned int storage_block_binding; //Intialized to zero
+        static unsigned int buffer_count; //Intialized to zero
+        unsigned int storage_block_binding; 
         GLuint getStorageBlockBinding();
     public:
-        static unsigned int buffer_count;
+        GLuint buffer_idx;
         ShaderStorageBuffer(GLsizeiptr size, GLenum usage = GL_DYNAMIC_COPY);
         ShaderStorageBuffer(std::vector<float> data, GLenum usage = GL_DYNAMIC_COPY);
         ShaderStorageBuffer(std::vector<glm::vec3> data, GLenum usage = GL_DYNAMIC_COPY);
@@ -114,17 +114,22 @@ public:
     void setUniform(const char* uni, const glm::mat4& val);
     void setUniform(const char* uni, const glm::mat3& val);
     void setUniform(const char* uni, const std::vector<glm::vec3>& val);
+    void setUniform(const char* uni, Texture* val);
+    void setUniform(const char* uni, FrameBuffer* val);
 
     void setShaderStorageBuffer(const char* name, ShaderStorageBuffer* buffer);
 
 protected:
     GLuint program;
+    std::map<std::string, GLuint> textureIds;
+    std::unordered_map<GLuint, bool> generateMipmap;
     std::unordered_map<std::string, GLint> uniforms;
     std::unordered_map<std::string, bool> uniformSet;
     ShaderProgram();
     ~ShaderProgram();
     
     void init_uniforms();
+    void set_textures();
     void print_log(GLuint object);
     char* file_read(const char* filename);
     GLuint create_shader(const char* filename, GLenum type);
@@ -135,20 +140,15 @@ protected:
 
 class ShaderMaterial: public ShaderProgram{
 private:
-    std::map<std::string, GLuint> textureIds;
-    std::unordered_map<GLuint, bool> generateMipmap;
     GLuint create_program(const char *vert, const char *frag);
-    void render();
-    GLuint getProgramId();
+    
 public:
+    GLuint getProgramId();
+    void render();
     bool blending = true;
     bool depthTest = true;
     bool wireFrame = false;
     ShaderMaterial(const char* vert, const char* frag);
-
-    void setUniform(const char* uni, Texture* val);
-    void setUniform(const char* uni, FrameBuffer* val);
-    friend class Renderer;
 };
 
 class ComputeShaderProgram: public ShaderProgram{
@@ -161,7 +161,7 @@ public:
 };
 
 
-class Renderer{
+class Renderer{ 
 private:
     int width, height;
 public:

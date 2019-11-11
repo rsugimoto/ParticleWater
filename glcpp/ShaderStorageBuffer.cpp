@@ -7,6 +7,8 @@ ShaderStorageBuffer::ShaderStorageBuffer(GLsizeiptr size, GLenum usage){
     glGenBuffers(1, &buffer_idx);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, buffer_idx);
     glBufferData(GL_SHADER_STORAGE_BUFFER, size, NULL, usage);
+    float val = 0.0;
+    glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32F, GL_RED, GL_FLOAT, &val);
     storage_block_binding = buffer_count;
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, storage_block_binding, buffer_idx);
     buffer_count++;

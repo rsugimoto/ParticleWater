@@ -1,0 +1,15 @@
+#version 430
+
+layout(local_size_x=16) in;
+
+layout(std430) buffer positions_in{ vec4 pos_in[];};
+layout(std430) buffer densities_in{ float dns_in[];};
+layout(std430) buffer velocities_in{vec4 vel_in[];};
+layout(std430) buffer velocities_out{vec4 vel_out[];};
+layout(std430) buffer bucket{ float bkt[];};
+layout(std430) buffer distance_function{ float dist[];};
+layout(std430) buffer wall_weight_function{ vec4 wall[];};
+
+void main(){
+    uint threadIndex = gl_GlobalInvocationID.x;
+}

@@ -120,6 +120,16 @@ void ShaderProgram::init_uniforms(){
     }
 }
 
+void ShaderProgram::set_textures(){
+    for(auto itr = textureIds.begin(); itr!=textureIds.end(); ++itr){
+        auto i = (int)std::distance(textureIds.begin(), itr);
+        glActiveTexture((GLenum)(GL_TEXTURE0+i));
+        glBindTexture(GL_TEXTURE_2D, itr->second);
+        if(generateMipmap[itr->second])glGenerateMipmap(GL_TEXTURE_2D);
+        //std::cout<<"Bind texture "<<itr->second<<" to GL_TEXTURE"<<i<<std::endl;
+    }
+}
+
 void ShaderProgram::setUniform(const char* uni, GLboolean val){glUseProgram(program);if(uniforms.count(uni)==0)fprintf(stderr,"Uniform Variable %s Not Found\n", uni);uniformSet[uni]=true;glUniform1i(uniforms[uni], val);};
 void ShaderProgram::setUniform(const char* uni, GLfloat val){glUseProgram(program);if(uniforms.count(uni)==0)fprintf(stderr,"Uniform Variable %s Not Found\n", uni);uniformSet[uni]=true;glUniform1f(uniforms[uni], val);};
 void ShaderProgram::setUniform(const char* uni, const glm::vec2& val){glUseProgram(program);if(uniforms.count(uni)==0)fprintf(stderr,"Uniform Variable %s Not Found\n", uni);uniformSet[uni]=true;glUniform2fv(uniforms[uni], 1, glm::value_ptr(val));};
@@ -128,6 +138,19 @@ void ShaderProgram::setUniform(const char* uni, const float val[3]){glUseProgram
 void ShaderProgram::setUniform(const char* uni, const std::vector<glm::vec3>& val){glUseProgram(program);if(uniforms.count(uni)==0)fprintf(stderr,"Uniform Variable %s Not Found\n", uni);uniformSet[uni]=true;glUniform3fv(uniforms[uni], val.size(), glm::value_ptr(val.front()));};
 void ShaderProgram::setUniform(const char* uni, const glm::mat4& val){glUseProgram(program);if(uniforms.count(uni)==0)fprintf(stderr,"Uniform Variable %s Not Found\n", uni);uniformSet[uni]=true;glUniformMatrix4fv(uniforms[uni], 1, GL_FALSE, glm::value_ptr(val));};
 void ShaderProgram::setUniform(const char* uni, const glm::mat3& val){glUseProgram(program);if(uniforms.count(uni)==0)fprintf(stderr,"Uniform Variable %s Not Found\n", uni);uniformSet[uni]=true;glUniformMatrix3fv(uniforms[uni], 1, GL_FALSE, glm::value_ptr(val));};
+void ShaderProgram::setUniform(const char* uni, Texture* val){
+    glUseProgram(program);
+    if(uniforms.count(uni)==0)fprintf(stderr,"Uniform Variable %s Not Found\n", uni);
+    else {
+        uniformSet[uni]=true;
+        textureIds[uni] = val->getTextureId();
+        generateMipmap[val->getTextureId()]=val->generateMipmap;
+        auto itr = textureIds.find(uni);
+        auto index = std::distance(textureIds.begin(), itr);
+        glUniform1i(uniforms[uni], (GLint)index);
+    }
+};
+void ShaderProgram::setUniform(const char* uni, FrameBuffer* val){this->setUniform(uni, val->textures[0]);};
 
 void ShaderProgram::setShaderStorageBuffer(const char* name, ShaderStorageBuffer* buffer){
     GLuint index = glGetProgramResourceIndex(program, GL_SHADER_STORAGE_BLOCK, name);
