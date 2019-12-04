@@ -132,6 +132,8 @@ void ShaderProgram::set_textures(){
 
 void ShaderProgram::setUniform(const char* uni, GLboolean val){glUseProgram(program);if(uniforms.count(uni)==0)fprintf(stderr,"Uniform Variable %s Not Found\n", uni);uniformSet[uni]=true;glUniform1i(uniforms[uni], val);};
 void ShaderProgram::setUniform(const char* uni, GLfloat val){glUseProgram(program);if(uniforms.count(uni)==0)fprintf(stderr,"Uniform Variable %s Not Found\n", uni);uniformSet[uni]=true;glUniform1f(uniforms[uni], val);};
+void ShaderProgram::setUniform(const char* uni, GLdouble val){glUseProgram(program);if(uniforms.count(uni)==0)fprintf(stderr,"Uniform Variable %s Not Found\n", uni);uniformSet[uni]=true;glUniform1d(uniforms[uni], val);};
+void ShaderProgram::setUniform(const char* uni, GLuint val){glUseProgram(program);if(uniforms.count(uni)==0)fprintf(stderr,"Uniform Variable %s Not Found\n", uni);uniformSet[uni]=true;glUniform1ui(uniforms[uni], val);};
 void ShaderProgram::setUniform(const char* uni, const glm::vec2& val){glUseProgram(program);if(uniforms.count(uni)==0)fprintf(stderr,"Uniform Variable %s Not Found\n", uni);uniformSet[uni]=true;glUniform2fv(uniforms[uni], 1, glm::value_ptr(val));};
 void ShaderProgram::setUniform(const char* uni, const glm::vec3& val){glUseProgram(program);if(uniforms.count(uni)==0)fprintf(stderr,"Uniform Variable %s Not Found\n", uni);uniformSet[uni]=true;glUniform3fv(uniforms[uni], 1, glm::value_ptr(val));};
 void ShaderProgram::setUniform(const char* uni, const float val[3]){glUseProgram(program);if(uniforms.count(uni)==0)fprintf(stderr,"Uniform Variable %s Not Found\n", uni);uniformSet[uni]=true;glUniform3fv(uniforms[uni], 1, val);};

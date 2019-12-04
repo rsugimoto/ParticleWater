@@ -3,12 +3,11 @@ using namespace glcpp;
 
 unsigned int ShaderStorageBuffer::buffer_count = 0;
 
-ShaderStorageBuffer::ShaderStorageBuffer(GLsizeiptr size, GLenum usage){
+ShaderStorageBuffer::ShaderStorageBuffer(GLsizeiptr size, GLenum usage, GLenum internalformat){
     glGenBuffers(1, &buffer_idx);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, buffer_idx);
     glBufferData(GL_SHADER_STORAGE_BUFFER, size, NULL, usage);
-    float val = 0.0;
-    glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32F, GL_RED, GL_FLOAT, &val);
+    glClearBufferData(GL_SHADER_STORAGE_BUFFER, internalformat, GL_RED, GL_FLOAT, NULL);
     storage_block_binding = buffer_count;
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, storage_block_binding, buffer_idx);
     buffer_count++;
@@ -47,4 +46,12 @@ ShaderStorageBuffer::~ShaderStorageBuffer(){
 
 GLuint ShaderStorageBuffer::getStorageBlockBinding(){
     return storage_block_binding;
+}
+
+void ShaderStorageBuffer::setValue(uint value){
+    glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_RGBA8, GL_RED, GL_UNSIGNED_BYTE, &value);
+}
+
+void ShaderStorageBuffer::setValue(float value){
+    glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32F, GL_RED, GL_FLOAT, &value);
 }

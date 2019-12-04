@@ -94,11 +94,13 @@ class ShaderStorageBuffer{
         GLuint getStorageBlockBinding();
     public:
         GLuint buffer_idx;
-        ShaderStorageBuffer(GLsizeiptr size, GLenum usage = GL_DYNAMIC_COPY);
+        ShaderStorageBuffer(GLsizeiptr size, GLenum usage = GL_DYNAMIC_COPY, GLenum internalformat=GL_R32F);
         ShaderStorageBuffer(std::vector<float> data, GLenum usage = GL_DYNAMIC_COPY);
         ShaderStorageBuffer(std::vector<glm::vec3> data, GLenum usage = GL_DYNAMIC_COPY);
         ShaderStorageBuffer(std::vector<glm::vec4> data, GLenum usage = GL_DYNAMIC_COPY);
         ~ShaderStorageBuffer();
+        void setValue(uint value);
+        void setValue(float value);
 
     friend ShaderProgram;
 };
@@ -108,6 +110,8 @@ class ShaderProgram{
 public:
     void setUniform(const char* uni, GLboolean val);
     void setUniform(const char* uni, GLfloat val);
+    void setUniform(const char* uni, GLdouble val);
+    void setUniform(const char* uni, GLuint val);
     void setUniform(const char* uni, const glm::vec2& val);
     void setUniform(const char* uni, const glm::vec3& val);
     void setUniform(const char* uni, const float val[3]);

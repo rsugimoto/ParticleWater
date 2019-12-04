@@ -1,0 +1,30 @@
+#version 430
+
+layout(local_size_x=32) in;
+
+layout(std430) buffer positions_1{ vec4 pos1[];};
+layout(std430) buffer positions_2{ vec4 pos2[];};
+uniform uint num_particles;
+uniform float dam_fill_rate;
+
+void main(){
+    uvec3 GlobalInvocationSize = gl_NumWorkGroups*gl_WorkGroupSize;
+    uint threadsTotal = GlobalInvocationSize.x*GlobalInvocationSize.y*GlobalInvocationSize.z;
+    uint threadIndex = gl_GlobalInvocationID.z*GlobalInvocationSize.y*GlobalInvocationSize.x
+                    +gl_GlobalInvocationID.y*GlobalInvocationSize.x+gl_GlobalInvocationID.x;
+
+    float particle_volume = (1.0*1.0*dam_fill_rate)/float(num_particles);
+    float particle_cube_length = pow(particle_volume, 1./3.);
+    uint x_size = uint(ceil(dam_fill_rate/particle_cube_length));
+    uint y_size = uint(ceil(1./particle_cube_length));
+    uint z_size = uint(ceil(1./particle_cube_length));
+    for (uint i = threadIndex; i < num_particles; i+= threadsTotal){
+        vec4 pos;
+        pos.z = particle_cube_length/2.0 + 1.0*float(i%z_size)/float(z_size);
+        pos.y = particle_cube_length/2.0 + 1.0*float((i/z_size)%y_size)/float(y_size);
+        pos.x = particle_cube_length/2.0 + dam_fill_rate*float(i/(z_size*y_size))/float(x_size);
+        pos.w = 1.0;
+        pos1[i] = pos;
+        pos2[i] = pos;
+    }
+}

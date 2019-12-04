@@ -9,6 +9,12 @@ ParticleRenderer::ParticleRenderer(int width, int height){
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
     glEnable(GL_POINT_SPRITE);
     material = new ShaderMaterial("../shaders/particle_renderer.vert","../shaders/particle_renderer.frag");
+
+    glm::mat4 view = glm::lookAt(camera_pos, camera_lookAt, glm::vec3(0,1,0));
+    glm::mat4 projection = glm::perspective(glm::radians(fov), ((float)width)/((float)height), near, far); 
+    glm::mat4 mvpMatrix = projection*view;
+    material->setUniform("mvpMatrix", mvpMatrix);
+
 }
 
 ParticleRenderer::~ParticleRenderer(){
