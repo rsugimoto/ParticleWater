@@ -49,9 +49,5 @@ GLuint ShaderStorageBuffer::getStorageBlockBinding(){
 }
 
 void ShaderStorageBuffer::setValue(uint value){
-    glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_RGBA8, GL_RED, GL_UNSIGNED_BYTE, &value);
-}
-
-void ShaderStorageBuffer::setValue(float value){
-    glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32F, GL_RED, GL_FLOAT, &value);
+    glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_R32UI, GL_RED_INTEGER, GL_UNSIGNED_INT, &value);
 }

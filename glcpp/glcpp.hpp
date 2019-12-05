@@ -100,7 +100,6 @@ class ShaderStorageBuffer{
         ShaderStorageBuffer(std::vector<glm::vec4> data, GLenum usage = GL_DYNAMIC_COPY);
         ~ShaderStorageBuffer();
         void setValue(uint value);
-        void setValue(float value);
 
     friend ShaderProgram;
 };

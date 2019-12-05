@@ -1,9 +1,10 @@
 #version 430
 
 layout(local_size_x=32) in;
+const uint MAX_PARTICLES_PER_VOXEL = 16;
 
-layout(std430) buffer positions_in{ vec4 pos_in[];};
-layout(std430) buffer bucket{ uvec4 bkt[];};
+layout(std430) readonly buffer positions_in{ vec4 pos_in[];};
+layout(std430) writeonly buffer bucket{ uint bkt[][MAX_PARTICLES_PER_VOXEL];};
 uniform uint num_particles;
 uniform uint bucket_res;
 
@@ -14,10 +15,10 @@ void main(){
                     +gl_GlobalInvocationID.y*GlobalInvocationSize.x+gl_GlobalInvocationID.x;
 
     for (uint i = threadIndex; i < num_particles; i+= threadsTotal){
-        vec3 pos = clamp(pos_in[i].xyz, 0.0, 1.0);
+        vec3 pos = pos_in[i].xyz;
         uvec3 index_3d = uvec3(pos*float(bucket_res-1));
         uint index = bucket_res * (bucket_res * index_3d.z + index_3d.y) + index_3d.x;
-        for (int j=0; j<4; j++){
+        for (int j=0; j<MAX_PARTICLES_PER_VOXEL; j++){
             uint original = atomicCompSwap(bkt[index][j], num_particles, i);
             if(original==num_particles) break;
         }

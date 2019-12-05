@@ -2,8 +2,8 @@
 
 layout(local_size_x=32) in;
 
-layout(std430) buffer positions_1{ vec4 pos1[];};
-layout(std430) buffer positions_2{ vec4 pos2[];};
+layout(std430) writeonly buffer positions_1{ vec4 pos1[];};
+layout(std430) writeonly buffer positions_2{ vec4 pos2[];};
 uniform uint num_particles;
 uniform float dam_fill_rate;
 

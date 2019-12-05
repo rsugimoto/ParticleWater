@@ -23,9 +23,11 @@ int main(int argc, char* argv[]) {
     glutCreateWindow("ParticleWater");
     std::cout<<glGetString(GL_VERSION)<<std::endl;
 
-    uint particle_num = 1024;
+    uint particle_num = 8192;
+    uint bucket_res = 256;
     if(argc>1) particle_num = atoi(argv[1]);
-    ParticleSimulator* simulator = new ParticleSimulator(particle_num);
+    if(argc>2) bucket_res = atoi(argv[2]);
+    ParticleSimulator* simulator = new ParticleSimulator(particle_num, bucket_res);
     ParticleRenderer* renderer = new ParticleRenderer(width, height);
     simulator->setInitParticlePositions();
     renderer->render(simulator->getPositionBufferObject());

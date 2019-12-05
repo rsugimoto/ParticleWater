@@ -4,7 +4,7 @@
 ParticleSimulator::ParticleSimulator(unsigned int num_particles, unsigned int bucket_res){
     this->num_particles = num_particles;
     this->bucket_res = bucket_res;
-    assert(bucket_res*bucket_res*bucket_res<UINT32_MAX);
+    assert(bucket_res<=256);
     effective_radius = 1.0/bucket_res;
     dispatch_x = (int)std::ceil(num_particles/32.0)%65536;
     dispatch_y = (int)std::ceil(num_particles/(32.0*65536))%65536;
@@ -15,7 +15,7 @@ ParticleSimulator::ParticleSimulator(unsigned int num_particles, unsigned int bu
     positionBuffer2 = new ShaderStorageBuffer(num_particles*4*sizeof(GLfloat));
     velocityBuffer2 = new ShaderStorageBuffer(num_particles*4*sizeof(GLfloat));
     densityBuffer = new ShaderStorageBuffer(num_particles*1*sizeof(GLfloat));
-    bucketBuffer = new ShaderStorageBuffer((unsigned long)bucket_res*(unsigned long)bucket_res*(unsigned long)bucket_res*4*sizeof(GLuint), GL_DYNAMIC_COPY, GL_RGBA8);
+    bucketBuffer = new ShaderStorageBuffer((unsigned long)bucket_res*(unsigned long)bucket_res*(unsigned long)bucket_res*16*sizeof(GLuint), GL_DYNAMIC_COPY, GL_R32UI);
     //distanceFuncBuffer = new ShaderStorageBuffer(num_particles*4*sizeof(GLfloat), GL_STATIC_READ); //TO BE CHANGED
     //wallWeightBuffer = new ShaderStorageBuffer(num_particles*4*sizeof(GLfloat), GL_STATIC_READ); //TO BE CHANGED
 
