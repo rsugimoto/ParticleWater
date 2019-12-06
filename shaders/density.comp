@@ -3,7 +3,7 @@
 layout(local_size_x=32) in;
 const uint MAX_PARTICLES_PER_VOXEL = 16;
 
-layout(std430) writeonly buffer densities{ float dns[];};
+layout(std430) writeonly buffer densities{ double dns[];};
 layout(std430) readonly buffer positions_in{ vec4 pos_in[];};
 layout(std430) readonly buffer bucket{ uint bkt[][MAX_PARTICLES_PER_VOXEL];};
 uniform uint num_particles;
@@ -11,7 +11,7 @@ uniform uint bucket_res;
 uniform double re;
 uniform double re2;
 uniform double re9;
-uniform float mass;
+uniform double mass;
 
 #define POW3(x) ((x)*(x)*(x))
 
@@ -21,7 +21,7 @@ double W(vec3 r){
     const double c = 315.0/(64.0*PI);
     double abs_r2 = dot(r,r);
     double diff_r2 = re2-abs_r2;
-    return abs_r2<re2?c*POW3(diff_r2)/re9:0.0;
+    return 0<diff_r2?c*POW3(diff_r2)/re9:0.0;
 }
 
 void main(){
@@ -31,37 +31,39 @@ void main(){
                     +gl_GlobalInvocationID.y*GlobalInvocationSize.x+gl_GlobalInvocationID.x;
 
     for (uint i = threadIndex; i < num_particles; i+= threadsTotal){
-        vec3 pos = clamp(pos_in[i].xyz, 0.0, 1.0);
-        uvec3 idx_3d = uvec3(pos*float(bucket_res-1));
+        vec3 pos_i = pos_in[i].xyz;
+        ivec3 idx_3d = ivec3(pos_i*float(bucket_res-1));
 
         double rho = 0.0;
         for (int x_offset=-1; x_offset<=1; x_offset++)
         for (int y_offset=-1; y_offset<=1; y_offset++)
         for (int z_offset=-1; z_offset<=1; z_offset++){
-            if (0<=idx_3d.x+x_offset && idx_3d.x+x_offset<bucket_res &&
-                0<=idx_3d.y+y_offset && idx_3d.y+y_offset<bucket_res &&
-                0<=idx_3d.z+z_offset && idx_3d.z+z_offset<bucket_res )
+            ivec3 idx_3d_j = idx_3d + ivec3(x_offset, y_offset, z_offset);
+            if(all(greaterThanEqual(idx_3d_j, ivec3(0))) && all(lessThan(idx_3d_j, ivec3(bucket_res))))
             {
-                uint bkt_j = bucket_res * (bucket_res * (idx_3d.z+z_offset) + (idx_3d.y+y_offset)) + (idx_3d.x+x_offset);
-                for (int k = 0; k<MAX_PARTICLES_PER_VOXEL; k++){
-                    uint j = bkt[bkt_j][k];
+                uint bkt_j = bucket_res * (bucket_res * idx_3d_j.z + idx_3d_j.y) + idx_3d_j.x;
+                for (uint j2 = 0; j2<MAX_PARTICLES_PER_VOXEL; j2++){
+                    uint j = bkt[bkt_j][j2];
                     if (j == num_particles) break;
-                    rho += double(mass)* W(pos.xyz - pos_in[j].xyz);
+                    rho += mass* W(pos_i - pos_in[j].xyz);
                 }
             }
         }
 
-        // vec3 r = vec3(re);
-        // if(pos.x<re) r.x += pos.x;
-        // if(pos.y<re) r.y += pos.y;
-        // if(pos.z<re) r.z += pos.z;
-        // if(pos.x>1.0-re) r.x -= pos.x;
-        // if(pos.y>1.0-re) r.y -= pos.y;
-        // if(pos.z>1.0-re) r.z -= pos.z;
+        // vec3 r = vec3(0.0);
+        // float f_re = float(re);
+        // if(pos_i.x<f_re) r.x += f_re-pos_i.x;
+        // if(pos_i.y<f_re) r.y += f_re-pos_i.y;
+        // if(pos_i.z<f_re) r.z += f_re-pos_i.z;
+        // if(pos_i.x>1.0-f_re) r.x += 1.0 - pos_i.x - f_re;
+        // if(pos_i.y>1.0-f_re) r.y += 1.0 - pos_i.y - f_re;
+        // if(pos_i.z>1.0-f_re) r.z += 1.0 - pos_i.z - f_re;
         // vec3 abs_r = abs(r);
-        // float min_r = min(abs_r.x, min(abs_r.y, abs_r.z));
-        // if (min_r<re)rho += min_r; //TODO: apply wall function correctly
+        // float max_r = max(abs_r.x, max(abs_r.y, abs_r.z));
+        // if(max_r>0){
+        //     rho += max_r*200;
+        // }
 
-        dns[i] = float(rho);
+        dns[i] = rho;
     }
 }

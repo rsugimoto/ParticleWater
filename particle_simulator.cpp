@@ -5,7 +5,7 @@ ParticleSimulator::ParticleSimulator(unsigned int num_particles, unsigned int bu
     this->num_particles = num_particles;
     this->bucket_res = bucket_res;
     assert(bucket_res<=256);
-    effective_radius = 1.0/bucket_res;
+    effective_radius = 1.0/(bucket_res-1);
     dispatch_x = (int)std::ceil(num_particles/32.0)%65536;
     dispatch_y = (int)std::ceil(num_particles/(32.0*65536))%65536;
     odd_iteration = true;
@@ -14,7 +14,7 @@ ParticleSimulator::ParticleSimulator(unsigned int num_particles, unsigned int bu
     velocityBuffer1 = new ShaderStorageBuffer(num_particles*4*sizeof(GLfloat));
     positionBuffer2 = new ShaderStorageBuffer(num_particles*4*sizeof(GLfloat));
     velocityBuffer2 = new ShaderStorageBuffer(num_particles*4*sizeof(GLfloat));
-    densityBuffer = new ShaderStorageBuffer(num_particles*1*sizeof(GLfloat));
+    densityBuffer = new ShaderStorageBuffer(num_particles*1*sizeof(GLdouble));
     bucketBuffer = new ShaderStorageBuffer((unsigned long)bucket_res*(unsigned long)bucket_res*(unsigned long)bucket_res*16*sizeof(GLuint), GL_DYNAMIC_COPY, GL_R32UI);
     //distanceFuncBuffer = new ShaderStorageBuffer(num_particles*4*sizeof(GLfloat), GL_STATIC_READ); //TO BE CHANGED
     //wallWeightBuffer = new ShaderStorageBuffer(num_particles*4*sizeof(GLfloat), GL_STATIC_READ); //TO BE CHANGED
@@ -42,7 +42,7 @@ ParticleSimulator::ParticleSimulator(unsigned int num_particles, unsigned int bu
     densityComputaionShader->setUniform("re9", (GLdouble)pow(effective_radius,9));
     velPosUpdateShader->setUniform("re", (GLdouble)effective_radius);
     velPosUpdateShader->setUniform("re6", (GLdouble)pow(effective_radius,6));
-   }
+}
 
 ParticleSimulator::~ParticleSimulator(){
     delete positionBuffer1;
@@ -67,14 +67,15 @@ void ParticleSimulator::setInitParticlePositions(){
     initPosShader->setUniform("num_particles", (GLuint)num_particles);
     initPosShader->setUniform("dam_fill_rate", (GLfloat)dam_fill_rate);
     initPosShader->dispatchCompute(dispatch_x, dispatch_y, 1);
-    
-    densityComputaionShader->setUniform("mass", (GLfloat)(1000*dam_fill_rate/num_particles));
-    velPosUpdateShader->setUniform("mass", (GLfloat)(1000*dam_fill_rate/num_particles));
+    double mass = 1000*dam_fill_rate/num_particles;
+    densityComputaionShader->setUniform("mass", (GLdouble)mass);
+    velPosUpdateShader->setUniform("mass", (GLdouble)mass);
     delete initPosShader;
 }
 
 void ParticleSimulator::update(float timestep){
-    ShaderStorageBuffer *pos_in, *vel_in, *pos_out, *vel_out; 
+    ShaderStorageBuffer *pos_in, *vel_in, *pos_out, *vel_out;
+    odd_iteration = !odd_iteration;
     if(odd_iteration){
         pos_in = positionBuffer1;
         pos_out = positionBuffer2;
@@ -86,7 +87,6 @@ void ParticleSimulator::update(float timestep){
         vel_in = velocityBuffer2;
         vel_out = velocityBuffer1;
     }
-    odd_iteration = !odd_iteration;
 
     bucketBuffer->setValue(num_particles);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
@@ -105,10 +105,9 @@ void ParticleSimulator::update(float timestep){
     velPosUpdateShader->setShaderStorageBuffer("positions_out", pos_out);
     velPosUpdateShader->setShaderStorageBuffer("velocities_in", vel_in);
     velPosUpdateShader->setShaderStorageBuffer("velocities_out", vel_out);
-    velPosUpdateShader->setUniform("timestep", (GLfloat)timestep);
+    velPosUpdateShader->setUniform("timestep", (GLdouble)timestep);
     velPosUpdateShader->dispatchCompute(dispatch_x, dispatch_y,1);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-
 }
 
 GLuint ParticleSimulator::getPositionBufferObject(){

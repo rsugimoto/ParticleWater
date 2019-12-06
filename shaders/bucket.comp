@@ -18,7 +18,7 @@ void main(){
         vec3 pos = pos_in[i].xyz;
         uvec3 index_3d = uvec3(pos*float(bucket_res-1));
         uint index = bucket_res * (bucket_res * index_3d.z + index_3d.y) + index_3d.x;
-        for (int j=0; j<MAX_PARTICLES_PER_VOXEL; j++){
+        for (uint j=0; j<MAX_PARTICLES_PER_VOXEL; j++){
             uint original = atomicCompSwap(bkt[index][j], num_particles, i);
             if(original==num_particles) break;
         }

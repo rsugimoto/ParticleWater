@@ -23,10 +23,12 @@ int main(int argc, char* argv[]) {
     glutCreateWindow("ParticleWater");
     std::cout<<glGetString(GL_VERSION)<<std::endl;
 
-    uint particle_num = 8192;
+    uint particle_num = 65536;
     uint bucket_res = 256;
     if(argc>1) particle_num = atoi(argv[1]);
     if(argc>2) bucket_res = atoi(argv[2]);
+    std::cout<<particle_num<<" Particles, "<<bucket_res<<"^3 Voxels"<<std::endl;
+
     ParticleSimulator* simulator = new ParticleSimulator(particle_num, bucket_res);
     ParticleRenderer* renderer = new ParticleRenderer(width, height);
     simulator->setInitParticlePositions();
@@ -39,7 +41,7 @@ int main(int argc, char* argv[]) {
 
         auto curr_time = std::chrono::high_resolution_clock::now();
         //auto time_passed = std::chrono::duration_cast<std::chrono::duration<float>>(curr_time-prev_time).count();
-        float time_passed = 0.01;
+        float time_passed = 0.001;
         frame_rate = frame_rate*0.05 + (1.0/time_passed)*0.95;
         prev_time = curr_time;
         simulator->update(time_passed);

@@ -48,6 +48,5 @@ void ParticleRenderer::render(GLuint vbo){
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glDisableVertexAttribArray((GLuint)attribute_location);
     }
-
     glFinish();
 }
