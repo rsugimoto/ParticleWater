@@ -23,9 +23,9 @@
 #include "../glm/gtc/type_ptr.hpp"
 #include "../glm/gtx/string_cast.hpp"
 
-namespace cv{
-    class Mat;
-}
+// namespace cv{
+//     class Mat;
+// }
 
 namespace glcpp{
 
@@ -57,8 +57,8 @@ public:
     int width, height;
     bool generateMipmap = false;
     //Constructor for making a texture from an image file.
-    Texture(const char* file, GLint minFilter, GLint magFilter, GLint wrapS, GLint wrapT, GLint internalFormat, GLint type=GL_UNSIGNED_BYTE);
-    Texture(cv::Mat image, GLint minFilter, GLint magFilter, GLint wrapS, GLint wrapT, GLint internalFormat, GLint type=GL_UNSIGNED_BYTE);
+    // Texture(const char* file, GLint minFilter, GLint magFilter, GLint wrapS, GLint wrapT, GLint internalFormat, GLint type=GL_UNSIGNED_BYTE);
+    // Texture(cv::Mat image, GLint minFilter, GLint magFilter, GLint wrapS, GLint wrapT, GLint internalFormat, GLint type=GL_UNSIGNED_BYTE);
     Texture(GLsizei width, GLsizei height, GLint minFilter, GLint magFilter, GLint wrapS, GLint wrapT, GLint internalFormat, GLenum format);
     Texture(GLfloat data[],GLsizei width, GLsizei height, GLint minFilter= GL_NEAREST,//GL_NEAREST_MIPMAP_LINEAR,
             GLint magFilter=GL_NEAREST, GLint wrapS=GL_CLAMP_TO_EDGE, GLint wrapT=GL_CLAMP_TO_EDGE,
