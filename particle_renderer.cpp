@@ -21,32 +21,49 @@ ParticleRenderer::~ParticleRenderer(){
     delete material;
 }
 
-void ParticleRenderer::render(GLuint vbo){
+void ParticleRenderer::render(GLuint pos, GLuint dns){
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     material->render();
-    const char* attribute_name = "position";
     glUseProgram(material->getProgramId());
-    GLint attribute_location = glGetAttribLocation(material->getProgramId(), attribute_name);
-    if (attribute_location == -1) fprintf(stderr, "Could not bind attribute %s\n", attribute_name);
-    else{
-        glEnableVertexAttribArray((GLuint)attribute_location);
-        // Describe our vertices array to OpenGL (it can't guess its format automatically)
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glVertexAttribPointer(
-                (GLuint)attribute_location, // attribute
-                4,                 // number of elements per vertex, here (x,y,z,w)
-                GL_FLOAT,          // the type of each element
-                GL_FALSE,          // take our values as-is
-                0,                 // no extra data between each position
-                0                  // offset of first element
-        );
-        GLint size;
-        glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-        glDrawArrays(GL_POINTS, 0, size/(sizeof(GL_FLOAT)*4));
-        
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glDisableVertexAttribArray((GLuint)attribute_location);
-    }
+    const char* attribute_name1 = "position";
+    GLint pos_attribute_location = glGetAttribLocation(material->getProgramId(), attribute_name1);
+    if (pos_attribute_location == -1) fprintf(stderr, "Could not bind attribute %s\n", attribute_name1);
+    const char* attribute_name2 = "density";
+    GLint dns_attribute_location = glGetAttribLocation(material->getProgramId(), attribute_name2);
+    if (dns_attribute_location == -1) fprintf(stderr, "Could not bind attribute %s\n", attribute_name2);
+
+    glEnableVertexAttribArray((GLuint)pos_attribute_location);
+    // Describe our vertices array to OpenGL (it can't guess its format automatically)
+    glBindBuffer(GL_ARRAY_BUFFER, pos);
+    glVertexAttribPointer(
+            (GLuint)pos_attribute_location, // attribute
+            4,                 // number of elements per vertex, here (x,y,z,w)
+            GL_FLOAT,          // the type of each element
+            GL_FALSE,          // take our values as-is
+            0,                 // no extra data between each position
+            0                  // offset of first element
+    );
+    GLint size;
+    glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+
+    glEnableVertexAttribArray((GLuint)dns_attribute_location);
+    // Describe our vertices array to OpenGL (it can't guess its format automatically)
+    glBindBuffer(GL_ARRAY_BUFFER, dns);
+    glVertexAttribPointer(
+            (GLuint)dns_attribute_location, // attribute
+            1,                 // number of elements per vertex, here (x,y,z,w)
+            GL_FLOAT,          // the type of each element
+            GL_FALSE,          // take our values as-is
+            0,                 // no extra data between each position
+            0                  // offset of first element
+    );
+    
+    glDrawArrays(GL_POINTS, 0, size/(sizeof(GL_FLOAT)*4));
+    
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glDisableVertexAttribArray((GLuint)pos_attribute_location);
+    glDisableVertexAttribArray((GLuint)dns_attribute_location);
+
     glFinish();
 }

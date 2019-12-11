@@ -14,8 +14,8 @@ ParticleSimulator::ParticleSimulator(unsigned int num_particles, unsigned int bu
     velocityBuffer1 = new ShaderStorageBuffer(num_particles*4*sizeof(GLfloat));
     positionBuffer2 = new ShaderStorageBuffer(num_particles*4*sizeof(GLfloat));
     velocityBuffer2 = new ShaderStorageBuffer(num_particles*4*sizeof(GLfloat));
-    densityBuffer = new ShaderStorageBuffer(num_particles*1*sizeof(GLdouble));
-    bucketBuffer = new ShaderStorageBuffer((unsigned long)bucket_res*(unsigned long)bucket_res*(unsigned long)bucket_res*16*sizeof(GLuint), GL_DYNAMIC_COPY, GL_R32UI);
+    densityBuffer = new ShaderStorageBuffer(num_particles*1*sizeof(GLfloat));
+    bucketBuffer = new ShaderStorageBuffer((unsigned long)bucket_res*(unsigned long)bucket_res*(unsigned long)bucket_res*MAX_PARTICLES_PER_VOXEL*sizeof(GLuint), GL_DYNAMIC_COPY, GL_R32UI);
     //distanceFuncBuffer = new ShaderStorageBuffer(num_particles*4*sizeof(GLfloat), GL_STATIC_READ); //TO BE CHANGED
     //wallWeightBuffer = new ShaderStorageBuffer(num_particles*4*sizeof(GLfloat), GL_STATIC_READ); //TO BE CHANGED
 
@@ -37,11 +37,11 @@ ParticleSimulator::ParticleSimulator(unsigned int num_particles, unsigned int bu
     bucketGenerationShader->setUniform("num_particles", (GLuint)num_particles);
     densityComputaionShader->setUniform("num_particles", (GLuint)num_particles);
     velPosUpdateShader->setUniform("num_particles", (GLuint)num_particles);
-    densityComputaionShader->setUniform("re", (GLdouble)effective_radius);
-    densityComputaionShader->setUniform("re2", (GLdouble)pow(effective_radius,2));
-    densityComputaionShader->setUniform("re9", (GLdouble)pow(effective_radius,9));
-    velPosUpdateShader->setUniform("re", (GLdouble)effective_radius);
-    velPosUpdateShader->setUniform("re6", (GLdouble)pow(effective_radius,6));
+    densityComputaionShader->setUniform("re", (GLfloat)effective_radius);
+    densityComputaionShader->setUniform("re2", (GLfloat)pow(effective_radius,2));
+    densityComputaionShader->setUniform("re9", (GLfloat)pow(effective_radius,9));
+    velPosUpdateShader->setUniform("re", (GLfloat)effective_radius);
+    velPosUpdateShader->setUniform("re6", (GLfloat)pow(effective_radius,6));
 }
 
 ParticleSimulator::~ParticleSimulator(){
@@ -60,16 +60,16 @@ ParticleSimulator::~ParticleSimulator(){
 }
 
 void ParticleSimulator::setInitParticlePositions(){
-    double dam_fill_rate = 0.2;
+    float dam_fill_rate = 0.5;
     auto initPosShader = new ComputeShaderProgram("../shaders/init_pos.comp");
     initPosShader->setShaderStorageBuffer("positions_1", positionBuffer1);
     initPosShader->setShaderStorageBuffer("positions_2", positionBuffer2);
     initPosShader->setUniform("num_particles", (GLuint)num_particles);
     initPosShader->setUniform("dam_fill_rate", (GLfloat)dam_fill_rate);
     initPosShader->dispatchCompute(dispatch_x, dispatch_y, 1);
-    double mass = 1000*dam_fill_rate/num_particles;
-    densityComputaionShader->setUniform("mass", (GLdouble)mass);
-    velPosUpdateShader->setUniform("mass", (GLdouble)mass);
+    float mass = dam_fill_rate/num_particles;
+    densityComputaionShader->setUniform("mass", (GLfloat)mass);
+    velPosUpdateShader->setUniform("mass", (GLfloat)mass);
     delete initPosShader;
 }
 
@@ -105,7 +105,7 @@ void ParticleSimulator::update(float timestep){
     velPosUpdateShader->setShaderStorageBuffer("positions_out", pos_out);
     velPosUpdateShader->setShaderStorageBuffer("velocities_in", vel_in);
     velPosUpdateShader->setShaderStorageBuffer("velocities_out", vel_out);
-    velPosUpdateShader->setUniform("timestep", (GLdouble)timestep);
+    velPosUpdateShader->setUniform("timestep", (GLfloat)timestep);
     velPosUpdateShader->dispatchCompute(dispatch_x, dispatch_y,1);
     glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 }
@@ -113,4 +113,8 @@ void ParticleSimulator::update(float timestep){
 GLuint ParticleSimulator::getPositionBufferObject(){
     if(odd_iteration) return positionBuffer2->buffer_idx;
     else return positionBuffer1->buffer_idx;
+}
+
+GLuint ParticleSimulator::getDensityBufferObject(){
+    return densityBuffer->buffer_idx;
 }

@@ -1,7 +1,7 @@
 #version 430
 
 layout(local_size_x=32) in;
-const uint MAX_PARTICLES_PER_VOXEL = 16;
+const uint MAX_PARTICLES_PER_VOXEL = 32;
 
 layout(std430) readonly buffer positions_in{ vec4 pos_in[];};
 layout(std430) writeonly buffer bucket{ uint bkt[][MAX_PARTICLES_PER_VOXEL];};

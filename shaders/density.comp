@@ -1,26 +1,25 @@
 #version 430
 
 layout(local_size_x=32) in;
-const uint MAX_PARTICLES_PER_VOXEL = 16;
+const uint MAX_PARTICLES_PER_VOXEL = 32;
 
-layout(std430) writeonly buffer densities{ double dns[];};
+layout(std430) writeonly buffer densities{ float dns[];};
 layout(std430) readonly buffer positions_in{ vec4 pos_in[];};
 layout(std430) readonly buffer bucket{ uint bkt[][MAX_PARTICLES_PER_VOXEL];};
 uniform uint num_particles;
 uniform uint bucket_res;
-uniform double re;
-uniform double re2;
-uniform double re9;
-uniform double mass;
+uniform float re2;
+uniform float re9;
+uniform float mass;
 
 #define POW3(x) ((x)*(x)*(x))
 
-const double PI = 3.14159265358979323846264338327950288; 
+const float PI = 3.14159265358979323846264338327950288; 
 
-double W(vec3 r){
-    const double c = 315.0/(64.0*PI);
-    double abs_r2 = dot(r,r);
-    double diff_r2 = re2-abs_r2;
+float W(vec3 r){
+    const float c = 315.0/(64.0*PI);
+    float abs_r2 = dot(r,r);
+    float diff_r2 = re2-abs_r2;
     return 0<diff_r2?c*POW3(diff_r2)/re9:0.0;
 }
 
@@ -34,7 +33,7 @@ void main(){
         vec3 pos_i = pos_in[i].xyz;
         ivec3 idx_3d = ivec3(pos_i*float(bucket_res-1));
 
-        double rho = 0.0;
+        float rho = 0.0;
         for (int x_offset=-1; x_offset<=1; x_offset++)
         for (int y_offset=-1; y_offset<=1; y_offset++)
         for (int z_offset=-1; z_offset<=1; z_offset++){
@@ -45,25 +44,11 @@ void main(){
                 for (uint j2 = 0; j2<MAX_PARTICLES_PER_VOXEL; j2++){
                     uint j = bkt[bkt_j][j2];
                     if (j == num_particles) break;
+                    //if (j == i) continue;
                     rho += mass* W(pos_i - pos_in[j].xyz);
                 }
             }
         }
-
-        // vec3 r = vec3(0.0);
-        // float f_re = float(re);
-        // if(pos_i.x<f_re) r.x += f_re-pos_i.x;
-        // if(pos_i.y<f_re) r.y += f_re-pos_i.y;
-        // if(pos_i.z<f_re) r.z += f_re-pos_i.z;
-        // if(pos_i.x>1.0-f_re) r.x += 1.0 - pos_i.x - f_re;
-        // if(pos_i.y>1.0-f_re) r.y += 1.0 - pos_i.y - f_re;
-        // if(pos_i.z>1.0-f_re) r.z += 1.0 - pos_i.z - f_re;
-        // vec3 abs_r = abs(r);
-        // float max_r = max(abs_r.x, max(abs_r.y, abs_r.z));
-        // if(max_r>0){
-        //     rho += max_r*200;
-        // }
-
         dns[i] = rho;
     }
 }
