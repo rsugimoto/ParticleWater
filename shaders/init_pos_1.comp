@@ -13,16 +13,16 @@ void main(){
     uint threadIndex = gl_GlobalInvocationID.z*GlobalInvocationSize.y*GlobalInvocationSize.x
                     +gl_GlobalInvocationID.y*GlobalInvocationSize.x+gl_GlobalInvocationID.x;
 
-    uint particle_per_dim = uint(ceil(pow(num_particles/(dam_fill_rate*dam_fill_rate), 1./3.)));
+    uint particle_per_dim = uint(ceil(pow(num_particles/dam_fill_rate, 1./3.)));
     uint x_size = uint(ceil(particle_per_dim*dam_fill_rate));
     uint y_size = particle_per_dim;
-    uint z_size = uint(ceil(particle_per_dim*dam_fill_rate));
+    uint z_size = particle_per_dim;
     float particle_cube_length = 1.0/float(particle_per_dim);
     for (uint i = threadIndex; i < num_particles; i+= threadsTotal){
         vec4 pos;
-        pos.z = particle_cube_length/2.0 + dam_fill_rate/2.0 +float(i%z_size) * dam_fill_rate/float(z_size);
+        pos.z = particle_cube_length/2.0 + float(i%z_size) * 1.0/float(z_size);
         pos.y = particle_cube_length/2.0 + float(uint(i/z_size)%y_size) * 0.9/float(y_size);
-        pos.x = particle_cube_length/2.0 + dam_fill_rate/2.0 + float(uint(i/uint(z_size*y_size))) * dam_fill_rate/float(x_size);
+        pos.x = particle_cube_length/2.0 + float(uint(i/uint(z_size*y_size))) * dam_fill_rate/float(x_size);
         pos.xyz += noise3(i)*(particle_cube_length);
         pos.w = 1.0;
         pos1[i] = pos;

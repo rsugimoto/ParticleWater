@@ -44,7 +44,6 @@ void main(){
                 for (uint j2 = 0; j2<MAX_PARTICLES_PER_VOXEL; j2++){
                     uint j = bkt[bkt_j][j2];
                     if (j == num_particles) break;
-                    //if (j == i) continue;
                     rho += mass* W(pos_i - pos_in[j].xyz);
                 }
             }

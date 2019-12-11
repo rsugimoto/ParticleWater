@@ -19,5 +19,5 @@ class ParticleSimulator {
         void update(float timestep);
         GLuint getPositionBufferObject();
         GLuint getDensityBufferObject();
-        void setInitParticlePositions();
+        void setInitParticlePositions(uint preset);
 };

@@ -37,7 +37,7 @@ ParticleSimulator::ParticleSimulator(unsigned int num_particles, unsigned int bu
     bucketGenerationShader->setUniform("num_particles", (GLuint)num_particles);
     densityComputaionShader->setUniform("num_particles", (GLuint)num_particles);
     velPosUpdateShader->setUniform("num_particles", (GLuint)num_particles);
-    densityComputaionShader->setUniform("re", (GLfloat)effective_radius);
+    //densityComputaionShader->setUniform("re", (GLfloat)effective_radius);
     densityComputaionShader->setUniform("re2", (GLfloat)pow(effective_radius,2));
     densityComputaionShader->setUniform("re9", (GLfloat)pow(effective_radius,9));
     velPosUpdateShader->setUniform("re", (GLfloat)effective_radius);
@@ -59,9 +59,16 @@ ParticleSimulator::~ParticleSimulator(){
     delete velPosUpdateShader;
 }
 
-void ParticleSimulator::setInitParticlePositions(){
+void ParticleSimulator::setInitParticlePositions(uint preset){
     float dam_fill_rate = 0.5;
-    auto initPosShader = new ComputeShaderProgram("../shaders/init_pos.comp");
+    ComputeShaderProgram* initPosShader;
+    switch(preset){
+        case 1: initPosShader = new ComputeShaderProgram("../shaders/init_pos_1.comp"); break;
+        case 2: initPosShader = new ComputeShaderProgram("../shaders/init_pos_2.comp"); break;
+        case 3: initPosShader = new ComputeShaderProgram("../shaders/init_pos_3.comp"); break;
+        default: initPosShader = new ComputeShaderProgram("../shaders/init_pos_1.comp");
+
+    }
     initPosShader->setShaderStorageBuffer("positions_1", positionBuffer1);
     initPosShader->setShaderStorageBuffer("positions_2", positionBuffer2);
     initPosShader->setUniform("num_particles", (GLuint)num_particles);
